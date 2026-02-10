@@ -175,3 +175,33 @@ Pour valider notre méthode, nous l'appliquons au message 6 qui est en anglais :
 - Texte déchiffré : William Blake The Tiger TIGER, tiger, burning bright In the forests of the night, What immortal hand or eye Could frame thy fearful symmetry? In what distant deeps or skies Burnt the fire of thine eyes? On what wings dare he aspire? What the hand dare seize the fire? And what shoulder and what art Could twist the sinews of thy heart? And when thy heart began to beat, What dread hand and what dread feet? What the hammer? what the chain? In what furnace was thy brain? What the anvil? What dread grasp Dare its deadly terrors clasp? When the stars threw down their spears, And water'd heaven with their tears, Did He smile His work to see? Did He who made the lamb make thee? Tiger, tiger, burning bright In the forests of the night, What immortal hand or eye Dare frame thy fearful symmetry ?
 
 Cela confirme que notre méthode d'analyse fréquentielle fonctionne efficacement pour les textes en français comme en anglais. Même si l'indice de coïncidence n'est pas parfaitement aligné avec les valeurs de référence, l'analyse des fréquences permet de trouver la clé correcte et d'obtenir un texte en clair cohérent.
+
+== Analyse par digrammes et trigrammes
+
+Pour déterminer si un message est en clair ou chiffré, nous avons implémenté une analyse basée sur les digrammes (groupes de 2 lettres) et les trigrammes (groupes de 3 lettres).
+
+Nous avons d'abord écrit les fonctions `count_digrams` et `count_trigrams` qui comptent les occurrences de chaque groupe de lettres dans un texte. Ensuite, la fonction `is_plaintext` compare les digrammes et trigrammes les plus fréquents du texte avec les références connues pour le français et l'anglais. Si un nombre suffisant de correspondances est trouvé, le texte est considéré comme étant en clair.
+
+#figure(image("3_3a.png"))
+#figure(image("3_3b.png"))
+
+#pagebreak()
+
+Résultats sur les messages chiffrés :
+- Les 4 messages chiffrés sont correctement identifiés comme "Texte chiffre" avec des scores de 0 ou 1 (aucun digramme/trigramme courant détecté)
+
+Résultats sur les messages déchiffrés :
+- Message 3 (français) : texte en clair, score = 15 (12 digrammes + 3 trigrammes correspondants)
+- Message 4 (français) : texte en clair, score = 14 (12 digrammes + 2 trigrammes correspondants)
+- Message 5 (français) : texte en clair, score = 15 (12 digrammes + 3 trigrammes correspondants)
+- Message 6 (anglais) : texte en clair, score = 18 (12 digrammes + 6 trigrammes correspondants)
+
+La différence de score entre les messages chiffrés (0-1) et déchiffrés (14-18) est très nette, ce qui confirme que l'analyse par digrammes et trigrammes est une méthode fiable pour distinguer un texte en clair d'un texte chiffré par substitution.
+
+== (BONUS) Lettres répétées consécutivement 
+
+Notre fonction `count_repeated_letters` parcourt le texte et identifie toutes les lettres qui apparaissent consécutivement un nombre donné de fois (2 ou 3 fois).
+
+#figure(image("3_4.png", height: 420pt))
+
+Cette analyse des lettres répétées peut servir d'indice supplémentaire pour la reconnaissance de la langue d'un texte. Par exemple, les doubles lettres les plus fréquentes en français sont les SS, LL, TT, et EE, ce qui correspond bien à nos résultats.
