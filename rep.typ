@@ -146,48 +146,32 @@ Le seul correct est le message 3 qui est bien en français.
 
 == Déchiffrement par analyse fréquentielle
 
-Notre fonction `decrypt_by_frequency_analysis` combine l'indice de coïncidence (pour déterminer la langue) et l'analyse des fréquences (pour trouver la clé).
+Notre fonction `decrypt_by_frequency_analysis` combine deux techniques :
+1. L'indice de coïncidence pour déterminer la langue probable du message
+2. L'analyse des fréquences des lettres pour trouver la clé de déchiffrement
+
+#figure(image("3_1a.png"))
+#figure(image("3_1b.png", height: 380pt))
 
 Résultats :
-- *Message 4* : la lettre la plus fréquente dans le texte chiffré est "H" (15.1%). L'écart entre H et E donne une clé de 3. Le texte déchiffré confirme le poème de Victor Hugo.
-- *Message 5* : la lettre la plus fréquente est "T" (20.1%). L'écart donne une clé de 15. Le texte déchiffré parle de Julie et Jules qui inventent un moyen de communication secret basé sur un rectangle de transposition.
+- *Message 4* :
+  - Indice de coïncidence : 0.0710 (indice proche du Danois, mais c'est du français)
+  - Lettre la plus fréquente : H (15.1%)
+  - Clé trouvée : 3 (écart entre H et E)
+  - Texte déchiffré : Demain, des l'aube, a l'heure ou blanchit la campagne, Je partirai. Vois-tu, je sais que tu m'attends. J'irai par la foret, j'irai par la montagne. Je ne puis demeurer loin de toi plus longtemps. Je marcherai les yeux fixes sur mes pensees, Sans rien voir au dehors, sans entendre aucun bruit, Seul, inconnu, le dos courbe, les mains croisees, Triste, et le jour pour moi sera comme la nuit. Je ne regarderai ni l'or du soir qui tombe, Ni les voiles au loin descendant vers Harfleur, Et quand j'arriverai, je mettrai sur ta tombe Un bouquet de houx vert et de bruyere en fleur. Victor Hugo - Les Contemplations
 
-[AJOUTER SCREENSHOT ICI]
+- *Message 5* :
+  - Indice de coïncidence : 0.0832 (indice proche du Malaysien, mais c'est du français)
+  - Lettre la plus fréquente : T (20.1%)
+  - Clé trouvée : 15 (écart entre T et E)
+  - Texte déchiffré : Julie et Jules ont invente un moyen de communication secret. l'expediteur ecrit le texte ligne par ligne dans un rectangle de 6 lignes et 3 colonnes. ensuite il le recopie colonne par colonne. Jules, pendant le controle de reseaux, a oublie sa calculette. il envoie le message suivant: BQTFZYLTKEDPCB ?PF. quelle doit etre la reponse de Julie?
 
 == Validation avec le message 6
 
-Le message 6 est validé avec succès par notre fonction d'analyse fréquentielle :
-- La lettre la plus fréquente dans le texte chiffré est "L" (13.1%).
-- La clé trouvée est 7.
-- Le texte déchiffré est le poème "The Tiger" (The Tyger) de William Blake, un poème anglais célèbre.
+Pour valider notre méthode, nous l'appliquons au message 6 qui est en anglais :
+- Indice de coïncidence : 0.0737 (plus proche du Finnois mais c'est de l'anglais...)
+- Lettre la plus fréquente : L (13.1%)
+- Clé trouvée : 7 (écart entre L et E)
+- Texte déchiffré : William Blake The Tiger TIGER, tiger, burning bright In the forests of the night, What immortal hand or eye Could frame thy fearful symmetry? In what distant deeps or skies Burnt the fire of thine eyes? On what wings dare he aspire? What the hand dare seize the fire? And what shoulder and what art Could twist the sinews of thy heart? And when thy heart began to beat, What dread hand and what dread feet? What the hammer? what the chain? In what furnace was thy brain? What the anvil? What dread grasp Dare its deadly terrors clasp? When the stars threw down their spears, And water'd heaven with their tears, Did He smile His work to see? Did He who made the lamb make thee? Tiger, tiger, burning bright In the forests of the night, What immortal hand or eye Dare frame thy fearful symmetry ?
 
-Cela confirme que notre méthode fonctionne aussi bien pour les textes en français qu'en anglais.
-
-[AJOUTER SCREENSHOT ICI]
-
-== Analyse par digrammes et trigrammes
-
-L'analyse des digrammes (paires de lettres) et trigrammes (triplets de lettres) permet de déterminer si un texte est en clair ou chiffré, et d'identifier sa langue. On compare les n-grammes les plus fréquents du texte avec des listes de référence (par exemple : "ES", "DE", "LE" en français ; "TH", "HE", "IN" en anglais).
-
-Nos fonctions `count_digrams`, `count_trigrams` et `is_clear_text` analysent un texte et calculent un score de correspondance avec les n-grammes de référence.
-
-Résultats :
-- *Message 4 chiffré* : les digrammes les plus fréquents (HV, DL, HQ...) ne correspondent pas aux digrammes français ou anglais courants → verdict : le message est *chiffré*.
-- *Message 4 déchiffré* : les digrammes trouvés (ES, AI, EN, DE, ER, LE...) correspondent aux digrammes français les plus courants → verdict : le message est *en clair* (Français).
-- *Message 6 chiffré* : les digrammes (AO, OL, OH...) ne correspondent pas → verdict : le message est *chiffré*.
-- *Message 6 déchiffré* : les digrammes (TH, HE, AT, RE, AN...) correspondent aux digrammes anglais → verdict : le message est *en clair* (Anglais).
-
-[AJOUTER SCREENSHOT ICI]
-
-== (BONUS) Lettres répétées
-
-L'analyse des lettres répétées (doublons consécutifs comme LL, SS, TT, etc.) fournit des indices supplémentaires sur la langue d'un texte.
-
-Pour les messages déchiffrés :
-- *Message 3 (FR)* : doublons trouvés : EE(2), RR(1), SS(1), TT(1), AA(1), NN(1)
-- *Message 4 (FR)* : doublons trouvés : EE(4), SS(3), TT(2), NN(1), MM(1), RR(1)
-- *Message 6 (EN)* : doublons trouvés : TT(6), MM(5), EE(5), LL(1), DD(1), RR(1)
-
-On observe que le texte anglais présente plus de doublons TT et MM, tandis que les textes français ont davantage de EE et SS. Ces motifs sont caractéristiques des langues et peuvent compléter les autres techniques d'analyse pour améliorer la détection de la langue.
-
-[AJOUTER SCREENSHOT ICI]
+Cela confirme que notre méthode d'analyse fréquentielle fonctionne efficacement pour les textes en français comme en anglais. Même si l'indice de coïncidence n'est pas parfaitement aligné avec les valeurs de référence, l'analyse des fréquences permet de trouver la clé correcte et d'obtenir un texte en clair cohérent.
