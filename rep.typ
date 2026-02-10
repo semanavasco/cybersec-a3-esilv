@@ -63,8 +63,131 @@ Comment puis-je protéger ma vie privée en ligne si tout ce que je fais est sui
 
 = Code César
 
+== Chiffrement et déchiffrement César
+
+Nous avons implémenté deux fonctions : `caesar_encode` pour chiffrer un message en décalant chaque lettre de l'alphabet d'un nombre donné, et `caesar_decode` pour l'inverser. Les fonctions gèrent les majuscules, les minuscules, et préservent les ponctuations, espaces, etc..
+
+#figure(image("1_1.png"))
+
+== Attaque par force brute
+
+Nous avons implémenté une fonction de force brute (`brute_force_caesar`) qui teste les 26 clés possibles (0 à 25) pour déchiffrer un message César.
+
+#figure(image("1_2.png"))
+
+Extraits du brute force pour les messages 1 et 2 :
+
+#raw("============ Message 1 ============
+Clé  0: WP NZOLRP PDE FY LCE
+Clé  1: VO MYNKQO OCD EX KBD
+Clé  2: UN LXMJPN NBC DW JAC
+  ...
+Clé 10: MF DPEBHF FTU VO BSU
+Clé 11: LE CODAGE EST UN ART
+Clé 12: KD BNCZFD DRS TM ZQS
+Clé 13: JC AMBYEC CQR SL YPR
+Clé 14: IB ZLAXDB BPQ RK XOQ
+Clé 15: HA YKZWCA AOP QJ WNP
+
+============ Message 2 ============
+Clé  0: HA YKZWCA AOP QJ WNP
+Clé  1: GZ XJYVBZ ZNO PI VMO
+Clé  2: FY WIXUAY YMN OH ULN
+  ...
+Clé 21: MF DPEBHF FTU VO BSU
+Clé 22: LE CODAGE EST UN ART
+Clé 23: KD BNCZFD DRS TM ZQS
+Clé 24: JC AMBYEC CQR SL YPR
+Clé 25: IB ZLAXDB BPQ RK XOQ")
+
+- Message 1 : "WP NZOLRP PDE FY LCE" → déchiffré avec la clé *11* : "LE CODAGE EST UN ART"
+
+- Message 2 : "HA YKZWCA AOP QJ WNP" → déchiffré avec la clé *22* : "LE CODAGE EST UN ART"
+
+On remarque que les deux messages donnent exactement le même texte en clair mais avec des clés différentes (11 et 22), ce qui montre qu'avec le chiffrement César, il existe plusieurs clés possibles pour obtenir le même résultat.
+
+
+#pagebreak()
+
+
+== Déchiffrement avec majuscules et minuscules
+
+Comme on a déjà implémenté ces contraintes dans nos fonctions on passe à la brute-force, nous avons identifié les messages :
+
+#figure(image("1_3a.png"))
+
+#raw("============ Brute force Message 3 ============
+  ...
+Clé 18: pendant la seconde guerre mondiale les americains employerent des indiens navajos pour crypter des messages. c'est l'un des rares codes de l'histoire a n'avoir jamais ete brise. l'impenetrabilite du code navajo vient en particulier du fait que cette langue n'a aucun lien avec une quelconque langue europeenne ou asiatique.
+  ...
+
+============ Brute force Message 4 ============
+  ...
+Clé  3: Demain, des l'aube, a l'heure ou blanchit la campagne, Je partirai. Vois-tu, je sais que tu m'attends. J'irai par la foret, j'irai par la montagne. Je ne puis demeurer loin de toi plus longtemps. Je marcherai les yeux fixes sur mes pensees, Sans rien voir au dehors, sans entendre aucun bruit, Seul, inconnu, le dos courbe, les mains croisees, Triste, et le jour pour moi sera comme la nuit. Je ne regarderai ni l'or du soir qui tombe, Ni les voiles au loin descendant vers Harfleur, Et quand j'arriverai, je mettrai sur ta tombe Un bouquet de houx vert et de bruyere en fleur. Victor Hugo - Les Contemplations
+  ...")
+
+La vérification par re-chiffrement confirme que nos fonctions sont correctes :
+
+#figure(image("1_3b.png"))
 
 = Indice de Coïncidence
 
+== Calcul de l'indice de coïncidence et détection de langue
+
+Notre fonction `coincidence_index` calcule l'indice pour chaque message, puis `detect_language` compare la valeur obtenue avec les indices présents dans le tableau :
+
+#figure(image("2_1a.png"))
+
+#figure(image("2_1b.png"))
+
+Le seul correct est le message 3 qui est bien en français.
 
 = L'Analyse Fréquentielle
+
+== Déchiffrement par analyse fréquentielle
+
+Notre fonction `decrypt_by_frequency_analysis` combine l'indice de coïncidence (pour déterminer la langue) et l'analyse des fréquences (pour trouver la clé).
+
+Résultats :
+- *Message 4* : la lettre la plus fréquente dans le texte chiffré est "H" (15.1%). L'écart entre H et E donne une clé de 3. Le texte déchiffré confirme le poème de Victor Hugo.
+- *Message 5* : la lettre la plus fréquente est "T" (20.1%). L'écart donne une clé de 15. Le texte déchiffré parle de Julie et Jules qui inventent un moyen de communication secret basé sur un rectangle de transposition.
+
+[AJOUTER SCREENSHOT ICI]
+
+== Validation avec le message 6
+
+Le message 6 est validé avec succès par notre fonction d'analyse fréquentielle :
+- La lettre la plus fréquente dans le texte chiffré est "L" (13.1%).
+- La clé trouvée est 7.
+- Le texte déchiffré est le poème "The Tiger" (The Tyger) de William Blake, un poème anglais célèbre.
+
+Cela confirme que notre méthode fonctionne aussi bien pour les textes en français qu'en anglais.
+
+[AJOUTER SCREENSHOT ICI]
+
+== Analyse par digrammes et trigrammes
+
+L'analyse des digrammes (paires de lettres) et trigrammes (triplets de lettres) permet de déterminer si un texte est en clair ou chiffré, et d'identifier sa langue. On compare les n-grammes les plus fréquents du texte avec des listes de référence (par exemple : "ES", "DE", "LE" en français ; "TH", "HE", "IN" en anglais).
+
+Nos fonctions `count_digrams`, `count_trigrams` et `is_clear_text` analysent un texte et calculent un score de correspondance avec les n-grammes de référence.
+
+Résultats :
+- *Message 4 chiffré* : les digrammes les plus fréquents (HV, DL, HQ...) ne correspondent pas aux digrammes français ou anglais courants → verdict : le message est *chiffré*.
+- *Message 4 déchiffré* : les digrammes trouvés (ES, AI, EN, DE, ER, LE...) correspondent aux digrammes français les plus courants → verdict : le message est *en clair* (Français).
+- *Message 6 chiffré* : les digrammes (AO, OL, OH...) ne correspondent pas → verdict : le message est *chiffré*.
+- *Message 6 déchiffré* : les digrammes (TH, HE, AT, RE, AN...) correspondent aux digrammes anglais → verdict : le message est *en clair* (Anglais).
+
+[AJOUTER SCREENSHOT ICI]
+
+== (BONUS) Lettres répétées
+
+L'analyse des lettres répétées (doublons consécutifs comme LL, SS, TT, etc.) fournit des indices supplémentaires sur la langue d'un texte.
+
+Pour les messages déchiffrés :
+- *Message 3 (FR)* : doublons trouvés : EE(2), RR(1), SS(1), TT(1), AA(1), NN(1)
+- *Message 4 (FR)* : doublons trouvés : EE(4), SS(3), TT(2), NN(1), MM(1), RR(1)
+- *Message 6 (EN)* : doublons trouvés : TT(6), MM(5), EE(5), LL(1), DD(1), RR(1)
+
+On observe que le texte anglais présente plus de doublons TT et MM, tandis que les textes français ont davantage de EE et SS. Ces motifs sont caractéristiques des langues et peuvent compléter les autres techniques d'analyse pour améliorer la détection de la langue.
+
+[AJOUTER SCREENSHOT ICI]
